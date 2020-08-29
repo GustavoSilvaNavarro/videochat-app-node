@@ -1,0 +1,137 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#video-grid {
+    display: flex;
+    flex-direction: row;
+}
+
+video {
+    height: 300px;
+    width: 400px;
+    object-fit: cover;
+}
+
+.main {
+    height: 100vh; /*le digo que ocupe todo la altura de la pantalla*/ 
+    display: flex; /*coloco los componetes div left y right en linea*/
+}
+
+.main_left {
+    flex: 0.8; /*quiero que ocupe el 80% del elemento flex mayor*/
+    display: flex;
+    flex-direction: column;
+}
+
+.main_right {
+    flex: 0.2;
+    display: flex;
+    flex-direction: column;
+    background-color: #242324;
+    border-left: 1px solid #3D3D42;
+}
+
+.video_window {
+    flex-grow: 1; /*hago que el div ocupe todo el largo posible*/
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main_controls {
+    display: flex;
+    justify-content: space-between;
+    background-color: #1C1E20;
+    color: #D2D2D2;
+}
+
+.main_control_block {
+    display: flex;
+}
+
+.control_button, .control_button_red {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 8px; /*padding 5px arriba y abajo y a los lados 8px*/
+    cursor: pointer; /*le digo que cuando pase mi cursor se va a ver una manito*/
+}
+
+.control_button i {
+    font-size: 22px;
+}
+
+.control_button:hover {
+    background-color: #343434;
+    border-radius: 5px; /*el borde del sombreado toma 5px*/ 
+}
+
+.main_header {
+    color: #F5F5F5;
+    text-align: center;
+    padding: 5px;
+}
+
+.main_chat_window {
+    display: flex;
+    flex-grow: 1;
+    overflow-y: auto; /*la propiedad overflow-y auto permite que el scroll se ajuste a la pantalla o div que eh puesto*/
+}
+
+.main_message_container {
+    padding: 22px 12px;
+    display: flex;
+}
+
+.main_message_container input {
+    flex-grow: 1;
+    background-color: transparent; /*le quito el color es transparente ahora*/
+    border: none; /*le quito el border*/
+    color: #f5f5f5; /*le pongo el color de lo que escribo*/
+}
+
+.messages {
+    color: white;
+    list-style: none; /*quito los puntos*/
+}
+
+
+.mute, .stop {
+    color: #CC3B33;
+}
+
+/*Edito mi scroll para que se vea mejor y no el que aparece por default en el navegador todo feo*/
+.main_chat_window::-webkit-scrollbar {
+    height: 8px; /*altura del scroll de*/
+    width: 8px; /*ancho del scroll*/
+    /*display: none; /*oculto el scroll sin que pierda la funcionalidad, no lo voy a usar por el momento*/ 
+}
+
+/*EDICION DE LA BARRA QUE APARECE EN EL SCROLL*/
+.main_chat_window::-webkit-scrollbar-thumb { /* Ponemos un color de fondo y redondeamos las esquinas del thumb */
+    background: grey;
+    border-radius: 4px;
+}
+
+.main_chat_window::-webkit-scrollbar-thumb:hover { /* Cambiamos el fondo y agregamos una sombra cuando esté en hover es decir cuando pasa el mouse sobre el */
+    background: #4b4b4b;
+    box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
+}
+
+.main_chat_window::-webkit-scrollbar-thumb:active { /*:active es cuando la estoy usando osea cuando le doy click*/
+    background-color: #353b48;
+}
+
+/*AHORA AFECTO EL TRACK QUE ES EL CONTENEDOR DE LA BARRITA ES TODA LA ALTURA*/
+.main_chat_window::-webkit-scrollbar-track { /* Ponemos un color de fondo y redondeamos las esquinas del track */
+    background: #242324;
+    border-radius: 4px; /*lo redondeo al igual que la barrita*/
+}
+
+.main_chat_window::-webkit-scrollbar-track:hover, .main__chat_window::-webkit-scrollbar-track:active {
+    background: #d4d4d4;
+}
