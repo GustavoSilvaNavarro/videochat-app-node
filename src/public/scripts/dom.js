@@ -14,6 +14,31 @@ const peer = new Peer(undefined, { //paso el undefined ya que peer generar un id
     port: '3001'
 });
 
+//NAVEGADORES ANTIGUOS PODRIAN NO IMPLEMENTAR LA FUNCION mediaDevices, ASI QUE LO CONFIGURAMOS COMO UN OBJETO VACIO PRIMERO
+if (navigator.mediaDevices === undefined) {
+    navigator.mediaDevices = {};
+};
+
+// Some browsers partially implement mediaDevices. We can't just assign an object
+// with getUserMedia as it would overwrite existing properties.
+// Here, we will just add the getUserMedia property if it's missing.
+if (navigator.mediaDevices.getUserMedia === undefined) {
+    navigator.mediaDevices.getUserMedia = function (constraints) {
+        // First get ahold of the legacy getUserMedia, if present
+        var getUserMedia = navigator.webKitGetUserMedia || navigator.mozGetUserMedia;
+        // Some browsers just don't implement it - return a rejected promise with an error
+        // to keep a consistent interface
+        if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMed is not implement in this browser'));
+        }
+
+        // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+        return new Promise (function(resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject);
+        });
+    }
+};
+
 let myVideoStream; //creo variable que utilizaré mas adelante en otra parte de mi codigo por el momento esta vacia
 
 //ACCESO (o CONECCION) A VIDEO Y AUDIO Y COLOCARLO POR PANTALLA
@@ -55,7 +80,10 @@ navigator.mediaDevices.getUserMedia ({ //recordar que esto se maneja con promesa
         $('.messages').append(`<li class="message"><b>User</b><br>${message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor
         scrollToBotton(); //llamo funcion que permite crear scroll al momento de enviar mails
     });
-})
+
+}).catch(err => {
+    console.log(err.name, ": ", err.message); // de esta manera puedo manejar mis errores
+});
 
 //ESCUCHO EVENTO DE DESCONECCION
 socket.on('user-disconnected', userId => { //recibo el evento que viene de servidor para desconeccion de usuario es decir recibo la indiccion de desconeccion
@@ -87,10 +115,16 @@ function connectToNewUser (userId, stream) { //le digo que reciba el id de usari
 
 //FUNCION DE INSERTAR DATOS DE STREAM Y PINTARLOS POR PANTALLA
 function addVideoStream (video, stream) {
-    video.srcObject = stream; //le doy la fuente es decir al elemento video que llegue le digo colocale el stream
+    if("srcObject" in video) {
+        video.srcObject = stream; //le doy la fuente es decir al elemento video que llegue le digo colocale el stream
+    } else {
+        //Impide usar esto en nuevos navegadores, mientras funcione lo de arriba
+        video.src = window.URL.createObjectURL(stream);
+    };
+
     video.addEventListener('loadedmetadata', () => { //agrego evento de carga de stream y cuando lo escuhe que se ejecute la funcion flecha que es reproducir el video
         video.play();
-    })
+    });
 
     videoGrid.append(video); //agrego a ese div los archivos de video
 };

@@ -6,11 +6,14 @@ body {
 #video-grid {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 video {
     height: 300px;
     width: 400px;
+    /*flex: 10%;*/
+    padding:5px;
     object-fit: cover;
 }
 
