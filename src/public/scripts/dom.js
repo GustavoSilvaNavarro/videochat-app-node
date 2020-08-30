@@ -2,6 +2,9 @@
 
 const socket = io('/'); //referencio mi socket ya que lo voy a usar mucho aqui para que funcione y le doy la ruta principal /
 
+//CREACION PROMP PARA USUARIO
+const name = prompt('What is your Name and Last Name?');
+
 //creo variables que unen html
 const videoGrid = document.querySelector('#video-grid'); //llamo a mi elemeno con id video-grid
 const myVideo = document.createElement('video'); //Creo elemento html
@@ -67,17 +70,20 @@ navigator.mediaDevices.getUserMedia ({ //recordar que esto se maneja con promesa
     //EMITIR O ENVIAR EVENTOS PARA MENSAJES EN CHAT
     let text = $('input'); //coloco varibale para luego llamarla (recordar que este metodo query es igual a decir document.querySelector();)
     $('html').keydown(e => { //llamo evento keydown por query
-        if(e.which == 13 && text.val().length !== 0) { //significa que cuyo evento es igual a presionar enter(13) y además el valor de lo escrito en el input su longitud es diferente de 0 ejecuta lo de adentro del if
-            console.log(text.val());
-            socket.emit('message', text.val()); //emite mi mensaje a servidor
+        let message = text.val();
+        if(e.which == 13 && message.length !== 0) { //significa que cuyo evento es igual a presionar enter(13) y además el valor de lo escrito en el input su longitud es diferente de 0 ejecuta lo de adentro del if
+            e.preventDefault();
+            console.log(message);
+            $('.messages').append(`<li class="message"><b>You</b><br>${message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor            
+            socket.emit('message', message); //emite mi mensaje a servidor
             text.val(''); //con el fin de que cuando envie el dato al presionar enter este se blakee o resetee
         }
     });
 
     //RECIBO EL MENSAJE DESDE MI SERVIDOR
-    socket.on('create-message', message => { //recibo mensaje, viene del servidor
-        console.log('This message comes from the server: ', message);
-        $('.messages').append(`<li class="message"><b>User</b><br>${message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor
+    socket.on('create-message', data => { //recibo mensaje, viene del servidor
+        console.log('This message comes from the server: ', data);
+        $('.messages').append(`<li class="message"><b>${data.name}</b><br>${data.message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor
         scrollToBotton(); //llamo funcion que permite crear scroll al momento de enviar mails
     });
 
@@ -95,7 +101,7 @@ socket.on('user-disconnected', userId => { //recibo el evento que viene de servi
 //INICIA CONEXION PEER 2 PEER (RECIVO LA CONECCION)
 peer.on('open', id => { //INICIA CONEXION DE PEER QUE GENERA UN ID DINAMICO que luego se lo doy al room especifico para que envie el dato del room con los usuarios que se conecten
     //EMISION DE DATOS DEL STREAM
-    socket.emit('join-room', ROOM_ID, id); //envio los datos del room especifico que los pase por el frontend y el id de usuario que le puse 10
+    socket.emit('join-room', ROOM_ID, id, name); //envio los datos del room especifico que los pase por el frontend y el id de usuario que le puse 10
 });
 
 //LLAMADA Y ENVIO DE MI STREAM AL NUEVO USARIO
