@@ -77,13 +77,14 @@ navigator.mediaDevices.getUserMedia ({ //recordar que esto se maneja con promesa
             $('.messages').append(`<li class="message"><b>You</b><br>${message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor            
             socket.emit('message', message); //emite mi mensaje a servidor
             text.val(''); //con el fin de que cuando envie el dato al presionar enter este se blakee o resetee
+            text.focus(); //para que se quede parpadeando el |
         }
     });
 
     //RECIBO EL MENSAJE DESDE MI SERVIDOR
     socket.on('create-message', data => { //recibo mensaje, viene del servidor
         console.log('This message comes from the server: ', data);
-        $('.messages').append(`<li class="message"><b>${data.name}</b><br>${data.message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor
+        $('.messages').append(`<li class="message"><b>${data.userName}</b> <span>${data.time}</span><br>${data.message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor
         scrollToBotton(); //llamo funcion que permite crear scroll al momento de enviar mails
     });
 

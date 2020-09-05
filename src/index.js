@@ -5,13 +5,15 @@ const app = express(); //ejecuto express y lo llamo app
 const path = require('path'); //llamo modulo path para facilidad de rutas
 const server = require('http').Server(app); //hago el llamado de mi servidor, OJO esto me permite usarlo con socket.io
 const io = require('socket.io')(server); //llamo socket.io que tiene que ser llamado por el servidor
+const objectData = require('./utils/message'); //llamo funcion creadora de objetos
+const { userJoin, getCurrentUser, userLeaves, getRoomUsers } = require('./utils/users'); //llamo las funciones creadas en carpeta utils y archivo useres.js
 /*const { ExpressPeerServer } = require('peer'); //LLAMADO DE MI SERVIDOR PARA PEER //llamo mi modulo peer el metodo express para servidor
 const peerServer = ExpressPeerServer(server, { //hago uso de metodo importado  //COLOCAR TODO JUNTO NO PONER COMENTARIOS EN EL MEDIO DE LOS LLAMADOS DE MIS MODULO SINO CODIGO NO CORRE
     debug: true
 });*/
 
 //SETTINGS DE LA APLICACION
-app.set('port', 3000);
+app.set('port', 3000 || process.env.PORT);
 app.set('views', path.join(__dirname, 'views')); //doy direccion a node para que encuentre el html de room
 app.engine('html', require('ejs').renderFile); //digo voy a usar html pero que renderice ejs que es donde se trabajo
 app.set('view engine', 'ejs'); //digo quiero que mi motor sea ejs
@@ -28,25 +30,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 //app.use('/peerjs', peerServer); //especifico el peerServer es decir el url que voy a utilizar
 
 //GUARDADO DE VARIABLE PARA USUARIOS
-const users = {};
+//const users = {};
 
 //COMUNICACION SOCKET.IO
  //lo uso cada vez que alguien ingresa a nuestra app
 io.on('connection', socket => { //recibo el socket del usuario que este ingresando y ejecuto
     //quiero escuchar cuando alguien se conecta al room especifico y el usuario especifico
     socket.on('join-room', (roomId, userId, name) => { //escucho al evento join-room
-        socket.join(roomId); //ese paquete de datos recibido lo coloco en el room especifico
-        socket.to(roomId).broadcast.emit('user-connected', userId); //quiero oir el evento user coneected es decir el paquete de datos que va al room luego le retransmito datos a los otros usarios
-        users[socket.id] = name;
+        const user = userJoin (userId, name, roomId);
+        socket.join(user.room); //ese paquete de datos recibido lo coloco en el room especifico
+        socket.to(user.room).broadcast.emit('user-connected', user.id); //quiero oir el evento user coneected es decir el paquete de datos que va al room luego le retransmito datos a los otros usarios
+        //users[socket.id] = name;
 
         socket.on('disconnect', () => { //recibo el evento de desconeccion cuando un usuario se desconecta para que lo haga de manera inmediata y no se quede congelada la imagen
-            socket.to(roomId).broadcast.emit('user-disconnected', userId); //emito de manera inmediata el evento deconeccion del usuario
+            socket.to(user.room).broadcast.emit('user-disconnected', user.id); //emito de manera inmediata el evento deconeccion del usuario
         });
 
         //RECIBO LOS MENSAJES DE MI DOM QUE ALGUN USUARIO O YO ESCRBIO
         socket.on('message', message => { //al presionar enter y tener algun valor en input recibo el mensaje aqui
             //io.to(roomId).emit('create-message', { message: message, name: users[socket.id] }); //Es lo mismo que abajo pero aqui no transmito el mensaje solo lo pego en roomId //recibo el mensaje y lo dirigo al roomId y lo retransmito a mi fornt end el mensaje recibido
-            socket.to(roomId).broadcast.emit('create-message', { message: message, name: users[socket.id] }); //recibo el mensaje y lo dirigo al roomId y lo retransmito a mi fornt end el mensaje recibido            
+            socket.to(user.room).broadcast.emit('create-message', objectData(user.username, message)); //recibo el mensaje y lo dirigo al roomId y lo retransmito a mi fornt end el mensaje recibido            
         });
     });
 });
