@@ -9,7 +9,7 @@ const name = prompt('What is your Name and Last Name?');
 const videoGrid = document.querySelector('#video-grid'); //llamo a mi elemeno con id video-grid
 const myVideo = document.createElement('video'); //Creo elemento html
 myVideo.muted = true; //esto lo hago ya que no quiero oir mi propio video sino quiero oir a la otra person por lo que muteo mi video para mi
-const peers = {}; //creo variable que permite trackear que usuario hizo la llamada para cuando salga
+const peers = [{}]; //creo variable que permite trackear que usuario hizo la llamada para cuando salga
 
 //CREACION DE PEER PARA LA CONECCIÓN
 const peer = new Peer(undefined, { //paso el undefined ya que peer generar un id automatico
@@ -74,10 +74,11 @@ navigator.mediaDevices.getUserMedia ({ //recordar que esto se maneja con promesa
         if(e.which == 13 && message.length !== 0) { //significa que cuyo evento es igual a presionar enter(13) y además el valor de lo escrito en el input su longitud es diferente de 0 ejecuta lo de adentro del if
             e.preventDefault();
             console.log(message);
-            $('.messages').append(`<li class="message"><b>You</b><br>${message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor            
+            $('.messages').append(`<li class="message"><b>Me</b> <span>${getTime()}</span><br>${message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor            
             socket.emit('message', message); //emite mi mensaje a servidor
             text.val(''); //con el fin de que cuando envie el dato al presionar enter este se blakee o resetee
             text.focus(); //para que se quede parpadeando el |
+            scrollToBotton(); //coloco para que cuando pegue mensajes baje el scroll
         }
     });
 
@@ -85,7 +86,7 @@ navigator.mediaDevices.getUserMedia ({ //recordar que esto se maneja con promesa
     socket.on('create-message', data => { //recibo mensaje, viene del servidor
         console.log('This message comes from the server: ', data);
         $('.messages').append(`<li class="message"><b>${data.userName}</b> <span>${data.time}</span><br>${data.message}</li>`); //llamo a la etiqueta ul que tiene clase messages y le dijo colocale etiquetas li con los mensajes que estoy recibiendo del servidor
-        scrollToBotton(); //llamo funcion que permite crear scroll al momento de enviar mails
+        scrollToBotton(); //llamo funcion que permite crear scroll al momento de enviar mails y baje el scroll
     });
 
 }).catch(err => {
@@ -138,8 +139,14 @@ function addVideoStream (video, stream) {
 
 //CREO FUNCION PARA COLOCAR SCROLL CUANDO ENVIO MUCHOS MENSAJES
 function scrollToBotton () { // coloco un scroll cuando tenga muchos mensajes
-    var d = $('.main_chat_window'); // llamo a mi clase main_chat_window
-    d.scrollTop(d.prop("scrollHeight")); // le doy funcion para colocar scroll solo en la vertical y le doy la propiedad scrollHeigt para decirle que este en toda la altura de la ventana
+    //PRIMERA FORMA
+
+    //var d = $('.main_chat_window'); // llamo a mi clase main_chat_window
+    //d.scrollTop(d.prop("scrollHeight")); // le doy funcion para colocar scroll solo en la vertical y le doy la propiedad scrollHeigt para decirle que este en toda la altura de la ventana
+
+    //SEGUNDA FORMA es la mas optima!!!!
+    const chatWindow = document.querySelector('.main_chat_window');
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 };
 
 //DOY FUNCIONALIDAD A MIS BOTONES
@@ -202,4 +209,20 @@ const setPlayVideo = () => {
         <span>Play Video</span>
     `; //creo html para reemplazar el actual
     document.querySelector('.main_video_button').innerHTML = play; //pego el html creado y reemplazo
+}
+
+function getTime() {
+    //CALCULO DE FECHA Y HORA ACTUAL
+    let fechaHora = new Date (); //llamo modulo de fechas
+
+    //CONDICIONALES PARA DARLE FORMATO A LA HORA Y FECHA con dos posiciones contando el cero
+    let day = (fechaHora.getDate().toString().length < 2) ? "0" + fechaHora.getDate() : fechaHora.getDate(); //uso operador ternario con (condicion) ? valor si verdad : valor si falso (es parecido a tener un if)
+    let month = ((fechaHora.getMonth() + 1).toString().length < 2) ? "0" + (fechaHora.getMonth() + 1) : (fechaHora.getMonth() + 1); //clacula de 0 a 11 por eso le pongo +1 para que calculo mes correcto
+    let hour = (fechaHora.getHours().toString().length < 2) ? "0" + fechaHora.getHours() : fechaHora.getHours();
+    let minute = (fechaHora.getMinutes().toString().length < 2) ? "0" + fechaHora.getMinutes() : fechaHora.getMinutes();
+    let jornada = hour >= 12 ? 'pm' : 'am'; //para que diferencie entre pm y am
+
+    let time = `${day}/${month} ${hour % 12}:${minute} ${jornada}`;//el hour le coloco % 12 para que saque reloj de 12 hrs y no de 24 hrs
+
+    return time;
 }
