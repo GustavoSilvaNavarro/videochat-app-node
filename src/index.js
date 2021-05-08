@@ -1,4 +1,4 @@
-//ESTE ES EL ARCHIVO QUE ARRANCA TODA MI APLICACION
+//ESTE ES EL ARCHIVO QUE ARRANCA TODA MI APLICACIONN
 //Empiezo con Llamado de Modulos Instalados
 const express = require('express'); //llamo modulo express
 const app = express(); //ejecuto express y lo llamo app
